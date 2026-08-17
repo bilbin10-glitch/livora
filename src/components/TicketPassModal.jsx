@@ -124,12 +124,31 @@ export default function TicketPassModal({
           <div className="pass-actions-row">
             <button className="btn-pass-action" onClick={handleCalendarDownload}>
               <Calendar size={16} />
-              <span>Add to Calendar (.ics)</span>
+              <span>Add to Calendar</span>
             </button>
 
             <button className="btn-pass-action" onClick={handlePrint}>
               <Printer size={16} />
               <span>Print Pass</span>
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
+            {onOpenWallet && (
+              <button
+                className="btn-pass-action"
+                style={{ flex: 1, background: 'var(--bg-secondary)', borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)', fontWeight: 700 }}
+                onClick={onOpenWallet}
+              >
+                <span>View in My Passes</span>
+              </button>
+            )}
+            <button
+              className="btn-hero-book"
+              style={{ flex: 1, padding: '0.65rem 1rem', fontSize: '0.85rem' }}
+              onClick={onClose}
+            >
+              <span>Done / Back to Shows</span>
             </button>
           </div>
         </div>

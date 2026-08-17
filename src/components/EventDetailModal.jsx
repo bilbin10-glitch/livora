@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, Clock, MapPin, Globe, ShieldAlert, Star, Play, Square, Ticket, Check } from 'lucide-react';
+import { X, Calendar, Clock, MapPin, Globe, ShieldAlert, Star, Play, Square, Ticket, Check, ArrowLeft } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
 import { playLiveSnippet, stopLiveSnippet } from '../utils/audioSynth';
 
@@ -31,6 +31,17 @@ export default function EventDetailModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        {/* Back Switch Button */}
+        <button
+          type="button"
+          className="back-switch-btn"
+          onClick={onClose}
+          style={{ position: 'absolute', top: '1.25rem', left: '1.25rem', zIndex: 25 }}
+        >
+          <ArrowLeft size={16} />
+          <span>Back to Live Shows</span>
+        </button>
+
         {/* Close Button */}
         <button className="modal-close-btn" onClick={onClose}>
           <X size={20} />

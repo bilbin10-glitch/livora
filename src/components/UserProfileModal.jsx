@@ -1,8 +1,19 @@
-import React, { useState } from 'react';
-import { X, User, Mail, Phone, MapPin, Sparkles, Ticket, Heart, LogOut, Save, ShieldCheck, Check } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, User, Mail, Phone, MapPin, Sparkles, Ticket, Heart, LogOut, Save, ShieldCheck, Check, Camera, Image, Upload } from 'lucide-react';
 import { updateUserProfile } from '../utils/auth';
 import { formatCurrency } from '../utils/helpers';
 import { CITIES, GENRES } from '../data/eventsData';
+
+const AVATAR_PRESETS = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=300&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=300&auto=format&fit=crop&q=80'
+];
 
 export default function UserProfileModal({
   user,
@@ -18,7 +29,9 @@ export default function UserProfileModal({
   const [name, setName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [city, setCity] = useState(user?.city || 'kochi');
+  const [avatar, setAvatar] = useState(user?.avatar || AVATAR_PRESETS[0]);
   const [selectedGenres, setSelectedGenres] = useState(user?.preferredGenres || ['Rock & Pop']);
+  const fileInputRef = useRef(null);
 
   if (!user) return null;
 
@@ -30,6 +43,22 @@ export default function UserProfileModal({
     });
   };
 
+  // Handle local file upload
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Please select an image smaller than 5MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        setAvatar(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSaveProfile = (e) => {
     e.preventDefault();
     const updated = updateUserProfile({
@@ -37,6 +66,7 @@ export default function UserProfileModal({
       name,
       phone,
       city,
+      avatar,
       preferredGenres: selectedGenres
     });
     onUpdateUser(updated);
@@ -45,15 +75,49 @@ export default function UserProfileModal({
 
   return (
     <div className="auth-overlay" onClick={onClose}>
-      <div className="profile-modal-card" onClick={(e) => e.stopPropagation()}>
+      <div className="profile-modal-card" style={{ maxWidth: '620px' }} onClick={(e) => e.stopPropagation()}>
         {/* Header Banner */}
-        <div className="profile-header-banner">
+        <div className="profile-header-banner" style={{ position: 'relative' }}>
           <button className="modal-close-btn" onClick={onClose} style={{ top: '1rem', right: '1rem' }}>
             <X size={18} />
           </button>
 
-          <div className="profile-avatar-box">
-            <img src={user.avatar} alt={user.name} className="profile-avatar-img" />
+          {/* Profile Avatar Box with Upload Trigger */}
+          <div className="profile-avatar-box" style={{ position: 'relative' }}>
+            <img src={avatar} alt={name} className="profile-avatar-img" />
+            
+            {isEditing && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  position: 'absolute',
+                  bottom: '2px',
+                  right: '2px',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: 'var(--brand-primary)',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid var(--bg-secondary)',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
+                }}
+                title="Change Photo / Upload Image"
+              >
+                <Camera size={16} />
+              </button>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+            />
           </div>
         </div>
 
@@ -62,7 +126,7 @@ export default function UserProfileModal({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>{user.name}</h2>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>{name}</h2>
                 {user.role === 'admin' && (
                   <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', borderRadius: '9999px', fontWeight: 800 }}>
                     👑 SuperAdmin
@@ -103,7 +167,48 @@ export default function UserProfileModal({
 
           {/* Edit Form or Read-only Info */}
           {isEditing ? (
-            <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+              {/* Avatar Selector Gallery */}
+              <div className="auth-input-group">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    Profile Photo / Avatar
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}
+                  >
+                    <Upload size={13} />
+                    <span>Upload from Device</span>
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                  {AVATAR_PRESETS.map((presetUrl, idx) => (
+                    <button
+                      type="button"
+                      key={idx}
+                      onClick={() => setAvatar(presetUrl)}
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '50%',
+                        overflow: 'hidden',
+                        border: avatar === presetUrl ? '2.5px solid var(--brand-primary)' : '2px solid var(--border-subtle)',
+                        padding: 0,
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        opacity: avatar === presetUrl ? 1 : 0.65,
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <img src={presetUrl} alt={`Avatar ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div className="auth-input-group">
                   <label>Full Name</label>
@@ -123,6 +228,7 @@ export default function UserProfileModal({
                     className="card-text-input"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+91 98450 12345"
                   />
                 </div>
               </div>
@@ -177,7 +283,7 @@ export default function UserProfileModal({
               <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: 'var(--radius-md)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.85rem' }}>
                 <div>
                   <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Phone Number</span>
-                  <div style={{ fontWeight: 700 }}>{user.phone || '+91 98765 43210'}</div>
+                  <div style={{ fontWeight: 700 }}>{user.phone || '+91 98450 12345'}</div>
                 </div>
                 <div>
                   <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Preferred Hub</span>

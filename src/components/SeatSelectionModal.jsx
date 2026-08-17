@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { X, Sparkles, Users, Layers, Ticket, ArrowRight, ShieldCheck, Info } from 'lucide-react';
+import { X, Sparkles, Users, Layers, Ticket, ArrowRight, ArrowLeft, ShieldCheck, Info } from 'lucide-react';
 import { getVenueArchitecture } from '../data/venueArchitectures';
 import { formatCurrency } from '../utils/helpers';
 
 export default function SeatSelectionModal({
   event,
   onClose,
+  onBack,
   onProceedToCheckout
 }) {
   const [selectedSeats, setSelectedSeats] = useState([]);
@@ -74,19 +75,43 @@ export default function SeatSelectionModal({
         <div className="seatmap-container">
           {/* Venue Header with 1000+ Capacity Metric */}
           <div className="seatmap-header">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span className="venue-capacity-badge">
-                  <Users size={13} />
-                  <span>Venue Capacity: {venueArch.totalCapacity.toLocaleString()} Seats</span>
-                </span>
-                <span className="venue-arch-tag">
-                  <Layers size={13} />
-                  <span>{venueArch.typeName}</span>
-                </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  {onBack && (
+                    <button
+                      type="button"
+                      onClick={onBack}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        background: 'var(--bg-tertiary)',
+                        border: '1px solid var(--border-subtle)',
+                        color: 'var(--text-secondary)',
+                        padding: '0.35rem 0.75rem',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <ArrowLeft size={14} />
+                      <span>Back</span>
+                    </button>
+                  )}
+                  <span className="venue-capacity-badge">
+                    <Users size={13} />
+                    <span>Venue Capacity: {venueArch.totalCapacity.toLocaleString()} Seats</span>
+                  </span>
+                  <span className="venue-arch-tag">
+                    <Layers size={13} />
+                    <span>{venueArch.typeName}</span>
+                  </span>
+                </div>
               </div>
 
-              <h2 className="seatmap-title" style={{ marginTop: '0.35rem' }}>{event.title}</h2>
+              <h2 className="seatmap-title" style={{ marginTop: '0.2rem' }}>{event.title}</h2>
               <div className="seatmap-subtitle">
                 {event.displayDate} • {event.time} • 📍 {event.venue}
               </div>

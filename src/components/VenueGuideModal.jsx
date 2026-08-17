@@ -1,22 +1,34 @@
 import React from 'react';
-import { X, MapPin, Navigation, Car, Utensils, Accessibility, ShieldCheck, Clock } from 'lucide-react';
+import { X, MapPin, Navigation, Car, Utensils, Accessibility, ShieldCheck, Clock, ArrowLeft } from 'lucide-react';
 
 export default function VenueGuideModal({ event, onClose }) {
   if (!event) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
+      <div className="modal-card" style={{ maxWidth: '640px', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
         {/* Close Button */}
         <button className="modal-close-btn" onClick={onClose}>
           <X size={20} />
         </button>
 
         <div style={{ padding: '1.75rem 1.75rem 1rem 1.75rem', borderBottom: '1px solid var(--border-subtle)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--brand-primary)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>
-            <MapPin size={16} />
-            <span>Venue Concierge & Guide</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', paddingRight: '2.5rem' }}>
+            <button
+              type="button"
+              className="back-switch-btn"
+              onClick={onClose}
+            >
+              <ArrowLeft size={15} />
+              <span>Back</span>
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--brand-primary)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>
+              <MapPin size={15} />
+              <span>Venue Concierge</span>
+            </div>
           </div>
+
           <h2 style={{ fontSize: '1.35rem', fontWeight: 800 }}>{event.venue.split(',')[0]}</h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{event.address}</p>
         </div>

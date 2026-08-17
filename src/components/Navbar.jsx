@@ -5,7 +5,7 @@ import { CITIES } from '../data/eventsData';
 export default function Navbar({
   searchQuery,
   setSearchQuery,
-  selectedCity,
+  selectedCities = [],
   onOpenCityModal,
   wishlistCount,
   onOpenWishlist,
@@ -18,7 +18,20 @@ export default function Navbar({
   onOpenProfile,
   onOpenAuth
 }) {
-  const currentCityObj = CITIES.find(c => c.id === selectedCity) || CITIES[0];
+  // Label for selected cities
+  const citiesArray = Array.isArray(selectedCities) ? selectedCities : selectedCities ? [selectedCities] : [];
+  
+  let locationLabel = 'All Locations';
+  if (citiesArray.length === 1) {
+    const c = CITIES.find(city => city.id === citiesArray[0]);
+    locationLabel = c ? `${c.icon} ${c.name}` : '1 City';
+  } else if (citiesArray.length === 2) {
+    const c1 = CITIES.find(city => city.id === citiesArray[0]);
+    const c2 = CITIES.find(city => city.id === citiesArray[1]);
+    locationLabel = `${c1?.name || ''}, ${c2?.name || ''}`;
+  } else if (citiesArray.length > 2) {
+    locationLabel = `${citiesArray.length} Cities Selected`;
+  }
 
   return (
     <header className="navbar-wrapper">
@@ -58,10 +71,28 @@ export default function Navbar({
 
         {/* Actions & Utilities */}
         <div className="nav-actions">
-          {/* City Selector */}
-          <button className="btn-city-picker" onClick={onOpenCityModal} title="Change City">
+          {/* Multi-City Selector Button */}
+          <button
+            className={`btn-city-picker ${citiesArray.length > 0 ? 'active' : ''}`}
+            onClick={onOpenCityModal}
+            title="Filter by One or Multiple Cities"
+          >
             <MapPin size={15} color="var(--brand-primary)" />
-            <span>{currentCityObj.icon} {currentCityObj.name}</span>
+            <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {locationLabel}
+            </span>
+            {citiesArray.length > 1 && (
+              <span style={{
+                background: 'var(--brand-primary)',
+                color: '#ffffff',
+                fontSize: '0.68rem',
+                fontWeight: 900,
+                padding: '0.1rem 0.4rem',
+                borderRadius: '9999px'
+              }}>
+                {citiesArray.length}
+              </span>
+            )}
           </button>
 
           {/* Wishlist */}

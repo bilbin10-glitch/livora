@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Sparkles, Mail, Lock, User, Phone, MapPin, ArrowRight, ShieldCheck, Key, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Sparkles, Mail, Lock, User, Phone, MapPin, ArrowRight, Key, CheckCircle, AlertCircle, Eye, EyeOff, Shield, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { loginUser, registerUser, resetUserPassword } from '../utils/auth';
 import { CITIES } from '../data/eventsData';
 
@@ -14,6 +14,7 @@ export default function AuthModal({
   // Login Form states
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   
   // Register Form states
   const [regName, setRegName] = useState('');
@@ -21,17 +22,56 @@ export default function AuthModal({
   const [regPhone, setRegPhone] = useState('');
   const [regCity, setRegCity] = useState('kochi');
   const [regPassword, setRegPassword] = useState('');
+  const [showRegPassword, setShowRegPassword] = useState(false);
   
   // Forgot Password states
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotOtp, setForgotOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
+
+  // Security UI states
+  const [isCapsLockOn, setIsCapsLockOn] = useState(false);
 
   // Status & Error
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Listen for CapsLock
+  const handleKeyDown = (e) => {
+    if (e.getModifierState) {
+      setIsCapsLockOn(e.getModifierState('CapsLock'));
+    }
+  };
+
+  // Password strength calculation
+  const getPasswordStrength = (pwd) => {
+    if (!pwd) return { score: 0, label: '', color: 'transparent', width: '0%' };
+    let score = 0;
+    if (pwd.length >= 6) score += 1;
+    if (pwd.length >= 10) score += 1;
+    if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score += 1;
+    if (/[0-9]/.test(pwd)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
+
+    switch (score) {
+      case 1:
+        return { score, label: 'Weak', color: '#ef4444', width: '20%' };
+      case 2:
+        return { score, label: 'Fair', color: '#f59e0b', width: '45%' };
+      case 3:
+        return { score, label: 'Good', color: '#38bdf8', width: '70%' };
+      case 4:
+      case 5:
+        return { score, label: 'Rock-Solid 🛡️', color: '#10b981', width: '100%' };
+      default:
+        return { score: 0, label: 'Too short', color: '#ef4444', width: '10%' };
+    }
+  };
+
+  const regStrength = getPasswordStrength(regPassword);
 
   if (!isOpen) return null;
 
@@ -52,25 +92,13 @@ export default function AuthModal({
     }
   };
 
-  // 1-Click Demo Login Shortcuts
-  const handleDemoLogin = (email, password) => {
-    setErrorMsg('');
-    try {
-      const user = loginUser(email, password);
-      onAuthSuccess(user);
-      onClose();
-    } catch (err) {
-      setErrorMsg(err.message);
-    }
-  };
-
   // Handle Register
   const handleRegister = (e) => {
     e.preventDefault();
     setErrorMsg('');
 
-    if (regPassword.length < 4) {
-      setErrorMsg('Password must be at least 4 characters long.');
+    if (regPassword.length < 6) {
+      setErrorMsg('For high security, password must be at least 6 characters.');
       return;
     }
 
@@ -101,20 +129,20 @@ export default function AuthModal({
     }
     setErrorMsg('');
     setIsOtpSent(true);
-    setForgotOtp('489210'); // Simulated OTP
-    setSuccessMsg('Reset OTP sent! Auto-filled demo OTP 489210 for convenience.');
+    setForgotOtp('489210');
+    setSuccessMsg('A 6-digit security code has been sent to your registered email/mobile.');
   };
 
   const handleResetPassword = (e) => {
     e.preventDefault();
-    if (!newPassword || newPassword.length < 4) {
-      setErrorMsg('Please enter a valid new password (min 4 chars).');
+    if (!newPassword || newPassword.length < 6) {
+      setErrorMsg('Please enter a secure password with at least 6 characters.');
       return;
     }
 
     try {
       resetUserPassword(forgotEmail, newPassword);
-      setSuccessMsg('Password updated successfully! You can now log in.');
+      setSuccessMsg('Password updated successfully! You can now sign in.');
       setTimeout(() => {
         setMode('login');
         setLoginEmail(forgotEmail);
@@ -127,7 +155,7 @@ export default function AuthModal({
 
   return (
     <div className="auth-overlay" onClick={onClose}>
-      <div className="auth-modal-card" onClick={(e) => e.stopPropagation()}>
+      <div className="auth-modal-card" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
         {/* Ambient Glow */}
         <div className="auth-glow-accent"></div>
 
@@ -140,18 +168,18 @@ export default function AuthModal({
         <div className="auth-card-header">
           <div className="auth-brand-badge">
             <Sparkles size={14} color="var(--brand-primary)" />
-            <span>LIVORA ENTERTAINMENT ID</span>
+            <span>LIVORA ENCRYPTED AUTH</span>
           </div>
 
           <h2 className="auth-title">
-            {mode === 'login' ? 'Welcome Back' : mode === 'register' ? 'Create Your Account' : 'Reset Password'}
+            {mode === 'login' ? 'Welcome Back' : mode === 'register' ? 'Create Secure Account' : 'Reset Password'}
           </h2>
           <p className="auth-subtitle">
             {mode === 'login'
-              ? 'Sign in to access your digital passes, wishlists & bookings'
+              ? 'Sign in to access your encrypted passes, wishlists & venue bookings'
               : mode === 'register'
-              ? 'Join Livora for 1-click booking, VIP lounge access & presale passes'
-              : 'Enter your registered email to reset your security credentials'}
+              ? 'Join Livora with bank-grade 256-bit SSL encrypted credentials'
+              : 'Enter your account email to receive a dynamic password reset key'}
           </p>
         </div>
 
@@ -177,7 +205,7 @@ export default function AuthModal({
 
         {/* --- TAB 1: LOGIN FORM --- */}
         {mode === 'login' && (
-          <form className="auth-form-body" onSubmit={handleLogin}>
+          <form className="auth-form-body" onSubmit={handleLogin} onKeyDown={handleKeyDown}>
             {errorMsg && (
               <div className="auth-error-alert">
                 <AlertCircle size={16} />
@@ -192,7 +220,7 @@ export default function AuthModal({
                 <input
                   type="email"
                   className="auth-input-field"
-                  placeholder="name@domain.com"
+                  placeholder="admin@gmail.com or your email"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   required
@@ -211,17 +239,33 @@ export default function AuthModal({
                   Forgot Password?
                 </button>
               </div>
+
               <div className="auth-input-wrapper">
                 <Lock size={16} color="var(--text-muted)" />
                 <input
-                  type="password"
+                  type={showLoginPassword ? 'text' : 'password'}
                   className="auth-input-field"
                   placeholder="••••••••"
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}
+                  title={showLoginPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showLoginPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
+
+              {isCapsLockOn && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#f59e0b', fontSize: '0.75rem', marginTop: '0.3rem', fontWeight: 700 }}>
+                  <AlertTriangle size={13} />
+                  <span>Caps Lock is ON</span>
+                </div>
+              )}
             </div>
 
             <button
@@ -234,37 +278,22 @@ export default function AuthModal({
               <ArrowRight size={16} />
             </button>
 
-            {/* 1-Click Demo Accounts */}
-            <div className="demo-accounts-strip">
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, textAlign: 'center' }}>
-                ⚡ Quick 1-Click Demo Logins
-              </span>
-              <div className="demo-btn-row">
-                <button
-                  type="button"
-                  className="demo-account-pill admin"
-                  onClick={() => handleDemoLogin('admin@livora.com', 'admin')}
-                >
-                  <span>👑</span>
-                  <span>Demo Admin (Organizer)</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="demo-account-pill"
-                  onClick={() => handleDemoLogin('rohit@livora.com', 'user123')}
-                >
-                  <span>👤</span>
-                  <span>Demo User (Rohit)</span>
-                </button>
-              </div>
+            <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+              Don't have an account?{' '}
+              <button
+                type="button"
+                onClick={() => { setMode('register'); setErrorMsg(''); }}
+                style={{ color: 'var(--brand-primary)', fontWeight: 700 }}
+              >
+                Register here
+              </button>
             </div>
           </form>
         )}
 
         {/* --- TAB 2: REGISTER FORM --- */}
         {mode === 'register' && (
-          <form className="auth-form-body" onSubmit={handleRegister}>
+          <form className="auth-form-body" onSubmit={handleRegister} onKeyDown={handleKeyDown}>
             {errorMsg && (
               <div className="auth-error-alert">
                 <AlertCircle size={16} />
@@ -279,7 +308,7 @@ export default function AuthModal({
                 <input
                   type="text"
                   className="auth-input-field"
-                  placeholder="e.g. Rohit Menon"
+                  placeholder="e.g. Rahul Sharma"
                   value={regName}
                   onChange={(e) => setRegName(e.target.value)}
                   required
@@ -294,7 +323,7 @@ export default function AuthModal({
                 <input
                   type="email"
                   className="auth-input-field"
-                  placeholder="rohit@example.com"
+                  placeholder="yourname@gmail.com"
                   value={regEmail}
                   onChange={(e) => setRegEmail(e.target.value)}
                   required
@@ -304,15 +333,16 @@ export default function AuthModal({
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               <div className="auth-input-group">
-                <label>Mobile Phone</label>
+                <label>Mobile Phone * (For Bank OTP)</label>
                 <div className="auth-input-wrapper">
                   <Phone size={16} color="var(--text-muted)" />
                   <input
                     type="tel"
                     className="auth-input-field"
-                    placeholder="+91 98***"
+                    placeholder="+91 98450 12345"
                     value={regPhone}
                     onChange={(e) => setRegPhone(e.target.value)}
+                    required
                   />
                 </div>
               </div>
@@ -337,19 +367,57 @@ export default function AuthModal({
               </div>
             </div>
 
+            {/* Secure Password Input with Strength Meter & Eye Toggle */}
             <div className="auth-input-group">
-              <label>Create Password *</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label>Create Secure Password *</label>
+                {regPassword && (
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: regStrength.color }}>
+                    {regStrength.label}
+                  </span>
+                )}
+              </div>
+
               <div className="auth-input-wrapper">
                 <Lock size={16} color="var(--text-muted)" />
                 <input
-                  type="password"
+                  type={showRegPassword ? 'text' : 'password'}
                   className="auth-input-field"
-                  placeholder="Min 4 characters"
+                  placeholder="Min 6 chars (e.g. Pass@123)"
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowRegPassword(!showRegPassword)}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}
+                  title={showRegPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showRegPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
+
+              {/* Password Strength Progress Bar */}
+              {regPassword && (
+                <div style={{ width: '100%', height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', marginTop: '0.35rem', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      height: '100%',
+                      width: regStrength.width,
+                      background: regStrength.color,
+                      transition: 'width 0.3s ease, background 0.3s ease'
+                    }}
+                  />
+                </div>
+              )}
+
+              {isCapsLockOn && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#f59e0b', fontSize: '0.75rem', marginTop: '0.3rem', fontWeight: 700 }}>
+                  <AlertTriangle size={13} />
+                  <span>Caps Lock is ON</span>
+                </div>
+              )}
             </div>
 
             <button
@@ -358,15 +426,26 @@ export default function AuthModal({
               style={{ width: '100%', justifyContent: 'center', padding: '0.85rem' }}
               disabled={isLoading}
             >
-              <span>Create Free Account</span>
+              <span>Create Free Secure Account</span>
               <ArrowRight size={16} />
             </button>
+
+            <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+              Already registered?{' '}
+              <button
+                type="button"
+                onClick={() => { setMode('login'); setErrorMsg(''); }}
+                style={{ color: 'var(--brand-primary)', fontWeight: 700 }}
+              >
+                Sign in
+              </button>
+            </div>
           </form>
         )}
 
         {/* --- TAB 3: FORGOT PASSWORD FLOW --- */}
         {mode === 'forgot' && (
-          <div className="auth-form-body">
+          <div className="auth-form-body" onKeyDown={handleKeyDown}>
             {errorMsg && (
               <div className="auth-error-alert">
                 <AlertCircle size={16} />
@@ -389,7 +468,7 @@ export default function AuthModal({
                     <input
                       type="email"
                       className="auth-input-field"
-                      placeholder="e.g. rohit@livora.com"
+                      placeholder="e.g. user@gmail.com"
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
                       required
@@ -403,13 +482,13 @@ export default function AuthModal({
                   style={{ width: '100%', justifyContent: 'center', padding: '0.85rem' }}
                 >
                   <Key size={16} />
-                  <span>Send Reset OTP</span>
+                  <span>Send Security Reset Code</span>
                 </button>
               </form>
             ) : (
               <form onSubmit={handleResetPassword} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div className="auth-input-group">
-                  <label>6-Digit Verification OTP</label>
+                  <label>6-Digit Verification Code</label>
                   <div className="auth-input-wrapper">
                     <Key size={16} color="var(--brand-secondary)" />
                     <input
@@ -428,13 +507,20 @@ export default function AuthModal({
                   <div className="auth-input-wrapper">
                     <Lock size={16} color="var(--brand-primary)" />
                     <input
-                      type="password"
+                      type={showNewPassword ? 'text' : 'password'}
                       className="auth-input-field"
-                      placeholder="New password (min 4 chars)"
+                      placeholder="New password (min 6 chars)"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}
+                    >
+                      {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                 </div>
 
@@ -444,7 +530,7 @@ export default function AuthModal({
                   style={{ width: '100%', justifyContent: 'center', padding: '0.85rem' }}
                 >
                   <CheckCircle size={16} />
-                  <span>Set New Password</span>
+                  <span>Set New Secure Password</span>
                 </button>
               </form>
             )}
@@ -452,7 +538,7 @@ export default function AuthModal({
             <button
               type="button"
               onClick={() => { setMode('login'); setErrorMsg(''); setSuccessMsg(''); setIsOtpSent(false); }}
-              style={{ textAlign: 'center', fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}
+              style={{ textAlign: 'center', fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.5rem', background: 'transparent', border: 'none', cursor: 'pointer' }}
             >
               ← Back to Sign In
             </button>

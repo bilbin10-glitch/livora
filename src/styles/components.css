@@ -712,6 +712,93 @@
   box-shadow: 0 4px 14px var(--brand-primary-glow);
 }
 
+/* Primary Action & Checkout CTA Buttons */
+.btn-proceed-checkout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 50%, #9f1239 100%) !important;
+  color: #ffffff !important;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 0.85rem 1.6rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 4px 20px rgba(225, 29, 72, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-proceed-checkout::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-proceed-checkout:hover {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #be123c 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(225, 29, 72, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  color: #ffffff !important;
+}
+
+.btn-proceed-checkout:hover::before {
+  left: 100%;
+}
+
+.btn-proceed-checkout:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(225, 29, 72, 0.4);
+}
+
+.btn-proceed-checkout:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-subtle) !important;
+  color: var(--text-muted) !important;
+}
+
+/* Universal Glassmorphic Back Switch Button */
+.back-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
+  background: rgba(22, 27, 43, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-pill);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.back-switch-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--brand-primary);
+  color: #ffffff;
+  transform: translateX(-3px);
+  box-shadow: 0 4px 16px var(--brand-primary-glow);
+}
+
 /* --- MODAL SYSTEM (DETAIL, SEATMAP, CHECKOUT, PASS) --- */
 .modal-overlay {
   position: fixed;

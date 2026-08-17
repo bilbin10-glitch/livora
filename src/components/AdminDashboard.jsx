@@ -17,7 +17,8 @@ import {
   TrendingUp,
   MapPin,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
 import { CATEGORIES } from '../data/eventsData';
@@ -108,12 +109,13 @@ export default function AdminDashboard({
           </button>
 
           <button
-            className="btn-pass-action"
+            className="back-switch-btn"
+            style={{ padding: '0.6rem 1.15rem', fontSize: '0.88rem' }}
             onClick={onExitAdmin}
-            title="Switch to customer booking app"
+            title="Switch to customer live shows explorer"
           >
-            <Eye size={16} />
-            <span>View Customer App</span>
+            <ArrowLeft size={16} />
+            <span>Back to Live Shows</span>
           </button>
         </div>
       </div>

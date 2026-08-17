@@ -1,5 +1,5 @@
 import React from 'react';
-import { SlidersHorizontal, RotateCcw, MapPin } from 'lucide-react';
+import { SlidersHorizontal, RotateCcw, MapPin, ChevronDown } from 'lucide-react';
 import { CITIES } from '../data/eventsData';
 
 export const DATE_FILTERS = [
@@ -32,15 +32,25 @@ export default function EventFilters({
   setPriceFilter,
   sortBy,
   setSortBy,
-  locationFilter,
-  setLocationFilter,
+  selectedCities = [],
+  onOpenCityModal,
   onReset
 }) {
+  const citiesArray = Array.isArray(selectedCities) ? selectedCities : selectedCities ? [selectedCities] : [];
   const hasActiveFilters =
     dateFilter !== 'all' ||
     priceFilter !== 'all' ||
     sortBy !== 'trending' ||
-    locationFilter !== 'all';
+    citiesArray.length > 0;
+
+  // Compute location button label
+  let locationBtnText = 'All Locations';
+  if (citiesArray.length === 1) {
+    const c = CITIES.find((city) => city.id === citiesArray[0]);
+    locationBtnText = c ? `${c.icon} ${c.name}` : '1 Location';
+  } else if (citiesArray.length > 1) {
+    locationBtnText = `📍 ${citiesArray.length} Locations Selected`;
+  }
 
   return (
     <div className="filter-bar-container">
@@ -60,23 +70,27 @@ export default function EventFilters({
 
         {/* Location + Price + Sort Selectors */}
         <div className="filter-actions-right">
-          {/* Location Dropdown */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-tertiary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '0 0.7rem' }}>
-            <MapPin size={14} color={locationFilter !== 'all' ? 'var(--brand-primary)' : 'var(--text-muted)'} />
-            <select
-              className="custom-select"
-              style={{ background: 'transparent', border: 'none', padding: '0.55rem 0.25rem' }}
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-            >
-              <option value="all">All Locations</option>
-              {CITIES.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.icon} {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Multi-Location Hub Filter Button */}
+          <button
+            type="button"
+            className="custom-select"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              cursor: 'pointer',
+              borderColor: citiesArray.length > 0 ? 'var(--brand-primary)' : 'var(--border-subtle)',
+              background: citiesArray.length > 0 ? 'rgba(225, 29, 72, 0.08)' : 'var(--bg-tertiary)'
+            }}
+            onClick={onOpenCityModal}
+            title="Filter shows by selecting one or more locations"
+          >
+            <MapPin size={14} color={citiesArray.length > 0 ? 'var(--brand-primary)' : 'var(--text-muted)'} />
+            <span style={{ fontWeight: citiesArray.length > 0 ? 700 : 500, color: citiesArray.length > 0 ? 'var(--brand-primary)' : 'inherit' }}>
+              {locationBtnText}
+            </span>
+            <ChevronDown size={14} color="var(--text-muted)" />
+          </button>
 
           <select
             className="custom-select"

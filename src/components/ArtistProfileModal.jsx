@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sparkles, Users, Calendar, MapPin, Ticket, Star, ExternalLink } from 'lucide-react';
+import { X, Sparkles, Users, Calendar, MapPin, Ticket, Star, ExternalLink, ArrowLeft } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
 
 export default function ArtistProfileModal({
@@ -15,7 +15,18 @@ export default function ArtistProfileModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
+      <div className="modal-card" style={{ maxWidth: '680px', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+        {/* Back Switch Button */}
+        <button
+          type="button"
+          className="back-switch-btn"
+          onClick={onClose}
+          style={{ position: 'absolute', top: '1.25rem', left: '1.25rem', zIndex: 25 }}
+        >
+          <ArrowLeft size={16} />
+          <span>Back to Event</span>
+        </button>
+
         {/* Close Button */}
         <button className="modal-close-btn" onClick={onClose}>
           <X size={20} />

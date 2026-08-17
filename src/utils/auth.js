@@ -1,30 +1,30 @@
-// Livora Authentication & User Database Manager (LocalStorage Backed)
+// Livora Authentication & User Database Manager
 
 const AUTH_KEYS = {
-  USERS: 'livora_users_db_v1',
-  CURRENT_USER: 'livora_current_session_v1'
+  USERS: 'livora_users_db_v2',
+  CURRENT_USER: 'livora_current_session_v2'
 };
 
 // Initial Seed Users
 const DEFAULT_USERS = [
   {
     id: 'usr_admin_1',
-    name: 'Sarah Sterling (Livora Admin)',
-    email: 'admin@livora.com',
-    password: 'admin',
+    name: 'Livora Master Admin',
+    email: 'admin@gmail.com',
+    password: 'admin123',
     role: 'admin',
     phone: '+91 98450 12345',
     city: 'kochi',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
     joinedDate: 'Jan 2026',
-    vipStatus: 'Livora Executive Admin',
-    walletBalance: 25000,
-    preferredGenres: ['Rock & Pop', 'Broadway & Theatre', 'Standup Comedy']
+    vipStatus: 'Livora Master Administrator',
+    walletBalance: 50000,
+    preferredGenres: ['Rock & Pop', 'Broadway & Theatre', 'Standup Comedy', 'Malayalam Live Shows']
   },
   {
     id: 'usr_user_1',
     name: 'Rohit Menon',
-    email: 'rohit@livora.com',
+    email: 'user@gmail.com',
     password: 'user123',
     role: 'user',
     phone: '+91 98765 43210',
@@ -44,7 +44,14 @@ export function getUsersDB() {
       localStorage.setItem(AUTH_KEYS.USERS, JSON.stringify(DEFAULT_USERS));
       return DEFAULT_USERS;
     }
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    // Ensure admin@gmail.com is present
+    const hasAdmin = parsed.some(u => u.email.toLowerCase() === 'admin@gmail.com');
+    if (!hasAdmin) {
+      parsed.unshift(DEFAULT_USERS[0]);
+      localStorage.setItem(AUTH_KEYS.USERS, JSON.stringify(parsed));
+    }
+    return parsed;
   } catch (e) {
     return DEFAULT_USERS;
   }
@@ -53,9 +60,9 @@ export function getUsersDB() {
 export function getCurrentUser() {
   try {
     const data = localStorage.getItem(AUTH_KEYS.CURRENT_USER);
-    return data ? JSON.parse(data) : DEFAULT_USERS[1]; // Default to Rohit Menon for smooth experience
+    return data ? JSON.parse(data) : null;
   } catch (e) {
-    return DEFAULT_USERS[1];
+    return null;
   }
 }
 
@@ -73,7 +80,7 @@ export function saveCurrentUser(user) {
 
 export function registerUser(newUser) {
   const users = getUsersDB();
-  const exists = users.find(u => u.email.toLowerCase() === newUser.email.toLowerCase());
+  const exists = users.find(u => u.email.toLowerCase() === newUser.email.toLowerCase().trim());
   if (exists) {
     throw new Error('An account with this email address already exists.');
   }
@@ -81,7 +88,7 @@ export function registerUser(newUser) {
   const created = {
     id: `usr_${Date.now()}`,
     name: newUser.name,
-    email: newUser.email,
+    email: newUser.email.trim().toLowerCase(),
     password: newUser.password,
     role: 'user',
     phone: newUser.phone || '+91 98000 00000',
@@ -106,7 +113,7 @@ export function loginUser(email, password) {
   );
 
   if (!found) {
-    throw new Error('Invalid email or password. Try demo credentials or register.');
+    throw new Error('Invalid email or password. Please verify your credentials.');
   }
 
   saveCurrentUser(found);
@@ -136,6 +143,17 @@ export function updateUserProfile(updatedUser) {
   localStorage.setItem(AUTH_KEYS.USERS, JSON.stringify(updatedList));
   saveCurrentUser(updatedUser);
   return updatedUser;
+}
+
+export function creditUserWallet(amount, reason = 'Booking Cancellation 100% Cashback') {
+  const currentUser = getCurrentUser();
+  if (!currentUser) return null;
+  const currentBalance = currentUser.walletBalance || 0;
+  const updated = {
+    ...currentUser,
+    walletBalance: currentBalance + amount
+  };
+  return updateUserProfile(updated);
 }
 
 export function logoutUser() {

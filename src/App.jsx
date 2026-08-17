@@ -20,15 +20,18 @@ import UserProfileModal from './components/UserProfileModal';
 import Toast from './components/Toast';
 import './styles/admin.css';
 import './styles/auth.css';
-import { getCurrentUser, saveCurrentUser, logoutUser } from './utils/auth';
+import { getCurrentUser, saveCurrentUser, logoutUser, creditUserWallet } from './utils/auth';
 
 import { EVENTS_DATA, CATEGORIES, CITIES } from './data/eventsData';
 import {
   getStoredBookings,
   saveBooking,
   cancelBookingInStorage,
+  removeBookingFromStorage,
   getStoredWishlist,
   toggleWishlistInStorage,
+  getStoredCities,
+  setStoredCities,
   getStoredCity,
   setStoredCity,
   getStoredTheme,
@@ -49,16 +52,15 @@ export default function App() {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  // City & Search state
-  const [selectedCity, setSelectedCity] = useState(getStoredCity);
+  // Multi-Location & Search state
+  const [selectedCities, setSelectedCities] = useState(getStoredCities);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // Filters, Sorting & Location state
+  // Filters & Sorting state
   const [dateFilter, setDateFilter] = useState('all');
   const [priceFilter, setPriceFilter] = useState('all');
   const [sortBy, setSortBy] = useState('trending');
-  const [locationFilter, setLocationFilter] = useState('all');
 
   // Events state (allows dynamic creation/deletion from Admin)
   const [eventsList, setEventsList] = useState(EVENTS_DATA);
@@ -99,7 +101,7 @@ export default function App() {
     saveCurrentUser(user);
     if (user.role === 'admin') {
       setIsAdminView(true);
-      showToast(`👑 Welcome back, ${user.name}! Routed to Organizer Suite.`);
+      showToast(`👑 Welcome back, Administrator! Routed to Organizer Suite.`);
     } else {
       setIsAdminView(false);
       showToast(`👋 Welcome back, ${user.name}!`);
@@ -131,11 +133,15 @@ export default function App() {
     showToast('Updated show selling momentum badge.');
   };
 
-  // Change City
-  const handleCityChange = (cityId) => {
-    setSelectedCity(cityId);
-    setStoredCity(cityId);
-    showToast(`Entertainment city changed to ${cityId.toUpperCase()}`);
+  // Change Multi-Cities
+  const handleSelectCities = (cities) => {
+    setSelectedCities(cities);
+    setStoredCities(cities);
+    if (cities.length === 0) {
+      showToast('Showing live shows across all entertainment hubs.');
+    } else {
+      showToast(`Filtered shows to ${cities.length} selected ${cities.length === 1 ? 'location' : 'locations'}.`);
+    }
   };
 
   // Toggle Wishlist
@@ -165,10 +171,25 @@ export default function App() {
     showToast('🎉 Booking Confirmed! Your QR Pass is ready.');
   };
 
-  const handleCancelBooking = (bookingId) => {
-    const updated = cancelBookingInStorage(bookingId);
+  const handleCancelBooking = (bookingId, refundAmount = 0, refundDetails = null) => {
+    const updated = cancelBookingInStorage(bookingId, refundAmount);
     setBookings(updated);
-    showToast('Booking cancelled.', 'info');
+
+    if (refundAmount > 0) {
+      const updatedUser = creditUserWallet(refundAmount);
+      if (updatedUser) {
+        setCurrentUser(updatedUser);
+      }
+      showToast(`🎉 Booking Cancelled! ₹${refundAmount.toLocaleString()} Instant Cashback credited to your Livora Wallet!`);
+    } else {
+      showToast('Booking cancelled.', 'info');
+    }
+  };
+
+  const handleDeleteBooking = (bookingId) => {
+    const updated = removeBookingFromStorage(bookingId);
+    setBookings(updated);
+    showToast('Booking record removed from wallet history.', 'info');
   };
 
   // Filtered & Sorted Events
@@ -200,8 +221,10 @@ export default function App() {
       // 4. Date Filter
       if (dateFilter === 'trending' && !ev.isTrending) return false;
 
-      // 5. Location Filter
-      if (locationFilter !== 'all' && ev.city !== locationFilter) return false;
+      // 5. Multi-Location Filter (If user chose several locations, show only those!)
+      if (selectedCities.length > 0 && !selectedCities.includes(ev.city)) {
+        return false;
+      }
 
       return true;
     }).sort((a, b) => {
@@ -212,7 +235,7 @@ export default function App() {
       if (sortBy === 'rating') return b.rating - a.rating;
       return 0;
     });
-  }, [eventsList, searchQuery, selectedCategory, priceFilter, dateFilter, sortBy, locationFilter]);
+  }, [eventsList, searchQuery, selectedCategory, priceFilter, dateFilter, sortBy, selectedCities]);
 
   // Featured Spotlight Events for Hero
   const featuredEvents = useMemo(() => {
@@ -243,13 +266,9 @@ export default function App() {
       if (!groups[ev.city]) groups[ev.city] = [];
       groups[ev.city].push(ev);
     });
-    // Order groups: selected city first, then alphabetically
-    return Object.entries(groups).sort(([a], [b]) => {
-      if (a === selectedCity) return -1;
-      if (b === selectedCity) return 1;
-      return a.localeCompare(b);
-    });
-  }, [filteredEvents, sortBy, selectedCity]);
+    // Order groups alphabetically or prioritized
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [filteredEvents, sortBy]);
 
   // Reset Filters
   const handleResetFilters = () => {
@@ -257,7 +276,8 @@ export default function App() {
     setPriceFilter('all');
     setSortBy('trending');
     setSelectedCategory('all');
-    setLocationFilter('all');
+    setSelectedCities([]);
+    setStoredCities([]);
     setSearchQuery('');
   };
 
@@ -267,7 +287,7 @@ export default function App() {
       <Navbar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        selectedCity={selectedCity}
+        selectedCities={selectedCities}
         onOpenCityModal={() => setIsCityModalOpen(true)}
         wishlistCount={wishlist.length}
         onOpenWishlist={() => setIsWishlistOpen(true)}
@@ -277,10 +297,9 @@ export default function App() {
         toggleTheme={toggleTheme}
         onToggleAdmin={() => {
           if (!currentUser || currentUser.role !== 'admin') {
-            // Prompt admin login
             setAuthModalMode('login');
             setIsAuthModalOpen(true);
-            showToast('Please sign in as Organizer/Admin (demo credentials available).', 'info');
+            showToast('Sign in with admin@gmail.com to access Organizer Suite.', 'info');
           } else {
             setIsAdminView(prev => !prev);
           }
@@ -328,16 +347,90 @@ export default function App() {
           setPriceFilter={setPriceFilter}
           sortBy={sortBy}
           setSortBy={setSortBy}
-          locationFilter={locationFilter}
-          setLocationFilter={setLocationFilter}
+          selectedCities={selectedCities}
+          onOpenCityModal={() => setIsCityModalOpen(true)}
           onReset={handleResetFilters}
         />
 
         {/* Events Grid Section */}
         <section>
+          {/* Active Multi-Location Filter Bar */}
+          {selectedCities.length > 0 && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '0.75rem',
+              background: 'rgba(225, 29, 72, 0.08)',
+              border: '1px solid rgba(225, 29, 72, 0.25)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.65rem 1rem',
+              marginBottom: '1.25rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--brand-primary)' }}>
+                  📍 Filtering {selectedCities.length} {selectedCities.length === 1 ? 'Location:' : 'Locations:'}
+                </span>
+                {selectedCities.map((cityId) => {
+                  const c = CITIES.find((city) => city.id === cityId);
+                  return (
+                    <span
+                      key={cityId}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: '9999px',
+                        padding: '0.2rem 0.6rem',
+                        fontSize: '0.78rem',
+                        fontWeight: 700
+                      }}
+                    >
+                      <span>{c?.icon} {c?.name || cityId}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = selectedCities.filter((id) => id !== cityId);
+                          handleSelectCities(updated);
+                        }}
+                        style={{ cursor: 'pointer', color: 'var(--text-muted)', fontWeight: 900, marginLeft: '2px' }}
+                        title={`Remove ${c?.name}`}
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsCityModalOpen(true)}
+                  style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--brand-primary)', cursor: 'pointer' }}
+                >
+                  + Add / Edit Locations
+                </button>
+                <span style={{ color: 'var(--text-muted)' }}>•</span>
+                <button
+                  type="button"
+                  onClick={() => handleSelectCities([])}
+                  style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', cursor: 'pointer' }}
+                >
+                  Clear Locations
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="events-section-header">
             <h2 className="section-title">
-              {sortBy === 'location'
+              {selectedCities.length > 0
+                ? `📍 Shows in Selected Locations`
+                : sortBy === 'location'
                 ? '📍 Shows by Location'
                 : selectedCategory === 'all'
                 ? '🔥 Trending Live Shows'
@@ -539,6 +632,11 @@ export default function App() {
         <SeatSelectionModal
           event={seatEvent}
           onClose={() => setSeatEvent(null)}
+          onBack={() => {
+            const ev = seatEvent;
+            setSeatEvent(null);
+            setDetailEvent(ev);
+          }}
           onProceedToCheckout={handleProceedToCheckout}
         />
       )}
@@ -546,7 +644,13 @@ export default function App() {
       {bookingDraft && (
         <CheckoutModal
           bookingDraft={bookingDraft}
+          currentUser={currentUser}
           onClose={() => setBookingDraft(null)}
+          onBack={() => {
+            const ev = bookingDraft.event;
+            setBookingDraft(null);
+            setSeatEvent(ev);
+          }}
           onBookingSuccess={handleBookingSuccess}
         />
       )}
@@ -565,9 +669,11 @@ export default function App() {
       {isWalletOpen && (
         <MyBookingsModal
           bookings={bookings}
+          currentUser={currentUser}
           onClose={() => setIsWalletOpen(false)}
           onViewPass={(pass) => setConfirmedPass(pass)}
           onCancelBooking={handleCancelBooking}
+          onDeleteBooking={handleDeleteBooking}
           onExploreEvents={() => setIsWalletOpen(false)}
         />
       )}
@@ -590,8 +696,8 @@ export default function App() {
 
       {isCityModalOpen && (
         <CitySelectorModal
-          selectedCity={selectedCity}
-          onSelectCity={handleCityChange}
+          selectedCities={selectedCities}
+          onSelectCities={handleSelectCities}
           onClose={() => setIsCityModalOpen(false)}
         />
       )}
