@@ -74,6 +74,7 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('login');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [pendingBookingEvent, setPendingBookingEvent] = useState(null);
 
   // Storage states
   const [wishlist, setWishlist] = useState(getStoredWishlist);
@@ -105,6 +106,15 @@ export default function App() {
     } else {
       setIsAdminView(false);
       showToast(`👋 Welcome back, ${user.name}!`);
+    }
+
+    // Auto-resume pending booking after signing in
+    if (pendingBookingEvent) {
+      const ev = pendingBookingEvent;
+      setPendingBookingEvent(null);
+      setDetailEvent(null);
+      setSeatEvent(ev);
+      showToast(`Signed in! Select your seats for "${ev.title}".`);
     }
   };
 
@@ -152,13 +162,26 @@ export default function App() {
     showToast(isSaved ? 'Saved show to Wishlist ❤️' : 'Removed show from Wishlist', 'info');
   };
 
-  // Booking Flow Triggers
+  // Booking Flow Triggers (Strict Login Gate Enforced)
   const handleStartBooking = (event) => {
+    if (!currentUser) {
+      setPendingBookingEvent(event);
+      setAuthModalMode('login');
+      setIsAuthModalOpen(true);
+      showToast('🔒 Please sign in to choose seats & book your live pass.', 'info');
+      return;
+    }
     setDetailEvent(null);
     setSeatEvent(event);
   };
 
   const handleProceedToCheckout = (draft) => {
+    if (!currentUser) {
+      setAuthModalMode('login');
+      setIsAuthModalOpen(true);
+      showToast('🔒 Please sign in to proceed with checkout & payment.', 'info');
+      return;
+    }
     setSeatEvent(null);
     setBookingDraft(draft);
   };
