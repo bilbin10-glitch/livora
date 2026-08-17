@@ -1,0 +1,305 @@
+/* =========================================================
+   LIVORA — ANIMATED AUTHENTICATION & USER PROFILE STYLES
+   ========================================================= */
+
+/* --- AUTH MODAL BACKDROP & CARD --- */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 5, 12, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.auth-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: linear-gradient(175deg, #131726 0%, #0d101c 100%);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), 0 0 30px rgba(225, 29, 72, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ambient Stage Glow Accent */
+.auth-glow-accent {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(225, 29, 72, 0.35) 0%, rgba(245, 158, 11, 0.15) 50%, transparent 70%);
+  pointer-events: none;
+  filter: blur(30px);
+}
+
+.auth-card-header {
+  padding: 2rem 2rem 1.25rem 2rem;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.auth-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  background: rgba(225, 29, 72, 0.15);
+  border: 1px solid rgba(225, 29, 72, 0.35);
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ffcad4;
+  margin-bottom: 0.75rem;
+}
+
+.auth-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Mode Switcher Tabs */
+.auth-mode-tabs {
+  display: flex;
+  margin: 0 2rem 1.25rem 2rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  border: 1px solid var(--border-subtle);
+  position: relative;
+  z-index: 2;
+}
+
+.auth-mode-btn {
+  flex: 1;
+  padding: 0.55rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border-radius: var(--radius-pill);
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.auth-mode-btn.active {
+  background: var(--brand-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 14px var(--brand-primary-glow);
+}
+
+/* Auth Form Fields */
+.auth-form-body {
+  padding: 0 2rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.auth-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.auth-input-group label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.auth-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  gap: 0.65rem;
+  transition: all var(--transition-fast);
+}
+
+.auth-input-wrapper:focus-within {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-primary-glow);
+  background: #151a2b;
+}
+
+.auth-input-field {
+  flex: 1;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.auth-input-field::placeholder {
+  color: #64748b;
+  font-weight: 400;
+}
+
+.auth-error-alert {
+  padding: 0.75rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: var(--radius-md);
+  color: #f87171;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.auth-success-alert {
+  padding: 0.75rem;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: var(--radius-md);
+  color: #34d399;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* Quick 1-Click Demo Accounts Strip */
+.demo-accounts-strip {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.demo-btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.demo-account-pill {
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.demo-account-pill:hover {
+  border-color: var(--brand-primary);
+  background: var(--bg-card-hover);
+  transform: translateY(-1px);
+}
+
+.demo-account-pill.admin {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.08);
+  color: #f59e0b;
+}
+
+/* --- USER PROFILE DRAWER / MODAL --- */
+.profile-modal-card {
+  width: 100%;
+  max-width: 650px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-header-banner {
+  position: relative;
+  height: 160px;
+  background: linear-gradient(135deg, #1e1b4b 0%, #4c0519 100%);
+  padding: 1.5rem;
+  display: flex;
+  align-items: flex-end;
+}
+
+.profile-avatar-box {
+  position: absolute;
+  bottom: -35px;
+  left: 1.75rem;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 4px solid var(--bg-secondary);
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-content-area {
+  padding: 3rem 1.75rem 1.75rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.profile-stat-box {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  text-align: center;
+}
+
+.profile-stat-val {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.profile-stat-lbl {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}

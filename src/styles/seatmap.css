@@ -1,0 +1,391 @@
+/* ===================================================================
+   LIVORA — HIGH-CAPACITY (1000+ SEATS) VENUE ARCHITECTURE & SEATING
+   =================================================================== */
+
+.seatmap-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+}
+
+.seatmap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.venue-meta-strip {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.venue-capacity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  font-weight: 700;
+  font-size: 0.75rem;
+  border-radius: var(--radius-pill);
+}
+
+.venue-arch-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  background: rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 0.75rem;
+  border-radius: var(--radius-pill);
+}
+
+/* Zone & Block Navigator Pills */
+.block-navigator-bar {
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+}
+
+.block-pill-card {
+  flex: 1;
+  min-width: 175px;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.block-pill-card:hover {
+  border-color: var(--border-medium);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
+
+.block-pill-card.active {
+  border-color: var(--block-color, var(--brand-primary));
+  background: rgba(22, 27, 43, 0.95);
+  box-shadow: 0 0 18px rgba(225, 29, 72, 0.2);
+}
+
+.block-pill-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.block-pill-name {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.block-pill-price {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--block-color, var(--brand-primary));
+}
+
+.block-pill-cap {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Stage Spotlight Beam */
+.stage-visualizer-container {
+  position: relative;
+  width: 70%;
+  margin: 0.25rem auto 1.25rem auto;
+  text-align: center;
+}
+
+.stage-light-glow {
+  height: 24px;
+  background: linear-gradient(180deg, rgba(225, 29, 72, 0.5) 0%, rgba(225, 29, 72, 0.05) 100%);
+  border-top: 4px solid var(--brand-primary);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  box-shadow: 0 -4px 22px var(--brand-primary-glow);
+}
+
+.stage-title-text {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* Seating Alignment Container */
+.venue-seating-canvas {
+  background: rgba(11, 14, 23, 0.8);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1rem;
+  max-height: 440px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+/* ARCHITECTURE 1: Curved Radial (Amphitheatres) */
+.layout-curved-radial .venue-seat-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+.layout-curved-radial .venue-seat-row:nth-child(1) { transform: perspective(400px) rotateX(10deg) scale(0.92); }
+.layout-curved-radial .venue-seat-row:nth-child(2) { transform: perspective(400px) rotateX(8deg) scale(0.95); }
+.layout-curved-radial .venue-seat-row:nth-child(3) { transform: perspective(400px) rotateX(5deg) scale(0.98); }
+.layout-curved-radial .venue-seat-row:nth-child(4) { transform: perspective(400px) scale(1); }
+.layout-curved-radial .venue-seat-row:nth-child(5) { transform: perspective(400px) scale(1.02); }
+
+/* ARCHITECTURE 2: Indoor Arena Bowl */
+.layout-arena-bowl .venue-seat-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+/* ARCHITECTURE 3: Proscenium Theatre */
+.layout-proscenium-theatre .venue-seat-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+/* ARCHITECTURE 4: Comedy Cabaret Club */
+.layout-cabaret-lounge .venue-seat-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+/* Row Block Group */
+.zone-block-group {
+  width: 100%;
+  max-width: 860px;
+  background: rgba(18, 22, 36, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.zone-block-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+/* Individual Seat Buttons */
+.venue-seat-btn {
+  position: relative;
+  width: 32px;
+  height: 30px;
+  border-radius: 6px 6px 3px 3px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.venue-seat-btn.aisle-spacing {
+  margin-right: 14px;
+}
+
+/* Tier Colors */
+.venue-seat-btn.tier-vip {
+  border-color: rgba(245, 158, 11, 0.5);
+  background: rgba(245, 158, 11, 0.1);
+  color: #fde68a;
+}
+.venue-seat-btn.tier-gold {
+  border-color: rgba(225, 29, 72, 0.5);
+  background: rgba(225, 29, 72, 0.1);
+  color: #fecdd3;
+}
+.venue-seat-btn.tier-silver {
+  border-color: rgba(6, 182, 212, 0.5);
+  background: rgba(6, 182, 212, 0.1);
+  color: #bae6fd;
+}
+.venue-seat-btn.tier-bronze {
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(139, 92, 246, 0.1);
+  color: #ddd6fe;
+}
+
+/* Seat States */
+.venue-seat-btn.available:hover {
+  transform: scale(1.22) translateY(-2px);
+  z-index: 10;
+  background: var(--bg-card-hover);
+  border-color: var(--brand-primary);
+  box-shadow: 0 4px 12px var(--brand-primary-glow);
+}
+
+.venue-seat-btn.selected {
+  background: var(--brand-primary) !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+  transform: scale(1.15);
+  box-shadow: 0 0 16px var(--brand-primary-glow);
+  z-index: 8;
+  font-weight: 900;
+}
+
+.venue-seat-btn.booked {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: transparent;
+  color: rgba(255, 255, 255, 0.12);
+  cursor: not-allowed;
+}
+
+.venue-seat-btn.reserved {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: rgba(245, 158, 11, 0.3);
+  cursor: not-allowed;
+}
+
+/* Row Labels */
+.row-identifier {
+  width: 48px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Hover Tooltip Preview */
+.seat-hover-card {
+  position: absolute;
+  bottom: 38px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #090a10;
+  border: 1px solid var(--border-medium);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Legend Box */
+.venue-legend-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding: 0.65rem 1rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.legend-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.legend-swatch {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+}
+
+/* Bottom Selection Summary Bar */
+.seatmap-checkout-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+}
+
+.selected-seat-tags-list {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  max-width: 500px;
+}
+
+.seat-tag-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  background: rgba(225, 29, 72, 0.15);
+  border: 1px solid var(--brand-primary);
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.seat-tag-remove {
+  cursor: pointer;
+  color: #ffcad4;
+  font-size: 0.75rem;
+}
+
+.seat-tag-remove:hover {
+  color: #ffffff;
+}

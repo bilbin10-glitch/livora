@@ -1,0 +1,38 @@
+{
+  "users": [
+    {
+      "id": "usr_admin_1",
+      "name": "Sarah Sterling",
+      "email": "admin@livora.com",
+      "password": "admin",
+      "role": "admin",
+      "phone": "+91 98450 12345",
+      "city": "kochi",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+      "joinedDate": "Jan 2026",
+      "vipStatus": "Livora Executive Admin",
+      "walletBalance": 25000,
+      "preferredGenres": ["Rock & Pop", "Broadway & Theatre", "Standup Comedy"]
+    },
+    {
+      "id": "usr_user_1",
+      "name": "Rohit Menon",
+      "email": "rohit@livora.com",
+      "password": "user123",
+      "role": "user",
+      "phone": "+91 98765 43210",
+      "city": "kochi",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80",
+      "joinedDate": "March 2026",
+      "vipStatus": "Gold VIP Passholder",
+      "walletBalance": 1850,
+      "preferredGenres": ["Malayalam Rock", "Standup Comedy", "Indie Blues"]
+    }
+  ],
+  "bookings": [],
+  "promoCodes": [
+    { "code": "LIVORA20", "discountPercent": 20, "maxDiscount": 600, "minAmount": 1000 },
+    { "code": "EARLYBIRD", "discountPercent": 15, "maxDiscount": 450, "minAmount": 800 },
+    { "code": "STAGEVIP", "discountPercent": 25, "maxDiscount": 1200, "minAmount": 2500 }
+  ]
+}
