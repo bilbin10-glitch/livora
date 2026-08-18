@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 const DB_PATH = path.join(__dirname, 'data', 'db.json');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 // Security & CORS Middleware
 app.use(cors({
@@ -360,10 +360,10 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n======================================================`);
   console.log(`🚀 LIVORA ENTERPRISE ENGINE RUNNING ON PORT ${PORT}`);
-  console.log(`📡 URL: http://localhost:${PORT}/api/health`);
+  console.log(`📡 URL: http://0.0.0.0:${PORT}/api/health`);
   console.log(`🔒 Security: Rate Limiting, XSS Protection & Atomic File Locks Enabled`);
   console.log(`💾 Database: ${DB_PATH}`);
   console.log(`======================================================\n`);
