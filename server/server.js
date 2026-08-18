@@ -342,13 +342,25 @@ app.post('/api/bookings/verify-qr', (req, res) => {
 const DIST_PATH = path.join(__dirname, '..', 'dist');
 if (fs.existsSync(DIST_PATH)) {
   app.use(express.static(DIST_PATH));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) {
-      return next();
-    }
-    res.sendFile(path.join(DIST_PATH, 'index.html'));
-  });
 }
+
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  const indexPath = path.join(DIST_PATH, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  res.send(`<!DOCTYPE html>
+  <html>
+    <head><title>Livora Backend API</title></head>
+    <body style="font-family:sans-serif;text-align:center;padding:50px;background:#090a10;color:#fff;">
+      <h2>🚀 Livora Live Server Online (Port ${PORT})</h2>
+      <p>API Endpoint: <a href="/api/health" style="color:#e11d48;">/api/health</a></p>
+    </body>
+  </html>`);
+});
 
 // Global Error Handler
 app.use((err, req, res, next) => {
