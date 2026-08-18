@@ -338,6 +338,18 @@ app.post('/api/bookings/verify-qr', (req, res) => {
   res.status(404).json({ valid: false, message: `Invalid Pass ID: ${passId}. Pass not found in system.` });
 });
 
+// Serve Built Frontend (SPA) in Production
+const DIST_PATH = path.join(__dirname, '..', 'dist');
+if (fs.existsSync(DIST_PATH)) {
+  app.use(express.static(DIST_PATH));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(DIST_PATH, 'index.html'));
+  });
+}
+
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error('Unhandled server error:', err);
