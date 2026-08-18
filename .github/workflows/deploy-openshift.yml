@@ -57,7 +57,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Step 6: Authenticate with Red Hat OpenShift Sandbox
+      # Step 6: Install OpenShift CLI (oc)
+      - name: Install OpenShift CLI (oc)
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: "latest"
+
+      # Step 7: Authenticate with Red Hat OpenShift Sandbox
       - name: Log in to OpenShift Cluster
         uses: redhat-actions/oc-login@v1
         with:
@@ -66,7 +72,7 @@ jobs:
           namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
           insecure_skip_tls_verify: true
 
-      # Step 7: Configure ImagePullSecret for Private GHCR Image (if needed)
+      # Step 8: Configure ImagePullSecret for Private GHCR Image
       - name: Configure Image Pull Secret for OpenShift
         run: |
           IMAGE_LOWERCASE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
@@ -82,7 +88,7 @@ jobs:
           # Link pull secret to default serviceaccount
           oc secrets link default ghcr-pull-secret --for=pull || true
 
-      # Step 8: Deploy Manifests to OpenShift
+      # Step 9: Deploy Manifests to OpenShift
       - name: Deploy to OpenShift
         run: |
           IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
@@ -99,7 +105,7 @@ jobs:
           # Wait for deployment rollout
           oc rollout status deployment/livora --timeout=180s
 
-      # Step 9: Output the Public OpenShift URL
+      # Step 10: Output the Public OpenShift URL
       - name: Show Live Application Route URL
         run: |
           ROUTE_HOST=$(oc get route livora -o jsonpath='{.spec.host}' 2>/dev/null || echo "Route creating...")
