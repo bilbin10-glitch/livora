@@ -61,18 +61,38 @@ jobs:
       - name: Install OpenShift CLI (oc)
         uses: redhat-actions/openshift-tools-installer@v1
         with:
-          oc: "latest"
+          oc: "4.14"
 
       # Step 7: Authenticate with Red Hat OpenShift Sandbox
       - name: Log in to OpenShift Cluster
-        uses: redhat-actions/oc-login@v1
-        with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
-          insecure_skip_tls_verify: true
+        env:
+          SERVER_RAW: ${{ secrets.OPENSHIFT_SERVER }}
+          TOKEN_RAW: ${{ secrets.OPENSHIFT_TOKEN }}
+          NAMESPACE_RAW: ${{ secrets.OPENSHIFT_NAMESPACE }}
+        run: |
+          # Clean inputs (strip leading/trailing whitespace, quotes, or accidental newlines)
+          CLEAN_SERVER=$(echo "$SERVER_RAW" | tr -d ' "\r\n')
+          CLEAN_TOKEN=$(echo "$TOKEN_RAW" | tr -d ' "\r\n')
+          CLEAN_NS=$(echo "$NAMESPACE_RAW" | tr -d ' "\r\n')
 
-      # Step 8: Configure ImagePullSecret for Private GHCR Image
+          if [ -z "$CLEAN_SERVER" ] || [ -z "$CLEAN_TOKEN" ]; then
+            echo "❌ ERROR: OPENSHIFT_SERVER or OPENSHIFT_TOKEN is empty in GitHub Secrets."
+            echo "Please check repository Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+          echo "Attempting oc login to server: $CLEAN_SERVER"
+          oc login --token="$CLEAN_TOKEN" --server="$CLEAN_SERVER" --insecure-skip-tls-verify=true
+          
+          if [ -n "$CLEAN_NS" ]; then
+            echo "Switching to namespace: $CLEAN_NS"
+            oc project "$CLEAN_NS" || true
+          fi
+          
+          echo "✓ Successfully authenticated with OpenShift as:"
+          oc whoami
+
+      # Step 8: Configure ImagePullSecret for GHCR Image
       - name: Configure Image Pull Secret for OpenShift
         run: |
           IMAGE_LOWERCASE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
@@ -101,6 +121,9 @@ jobs:
           
           # Apply Kubernetes/OpenShift resources
           oc apply -f openshift/
+          
+          # Trigger rollout restart
+          oc rollout restart deployment/livora || true
           
           # Wait for deployment rollout
           oc rollout status deployment/livora --timeout=180s
